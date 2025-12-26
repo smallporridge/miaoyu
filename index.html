@@ -160,7 +160,7 @@
     <input type="file" id="file-input" multiple accept="image/*" style="display: none;">
 
     <div id="webcam-wrapper">
-        <video id="webcam" autoplay playsinline muted style="display:none;"></video>
+        <video id="webcam" autoplay playsinline style="display:none;"></video>
         <canvas id="webcam-preview"></canvas>
     </div>
 
@@ -265,12 +265,6 @@
             renderer.toneMapping = THREE.ReinhardToneMapping; 
             renderer.toneMappingExposure = 2.0; 
             container.appendChild(renderer.domElement);
-
-            // Tap the tree (canvas) to enable hand gestures (request camera permission)
-            renderer.domElement.style.touchAction = 'manipulation';
-            renderer.domElement.addEventListener('pointerdown', () => {
-                startCameraFromUserGesture();
-            }, { once: true });
 
             mainGroup = new THREE.Group();
             scene.add(mainGroup);
@@ -667,59 +661,11 @@
                 runningMode: "VIDEO",
                 numHands: 1
             });
-            // Camera will be requested on user gesture (tap the tree)
-}
-
-
-        // --- iOS/iPhone compatibility: request camera ONLY after a user gesture (tap the tree) ---
-        let cameraStarted = false;
-        async function startCameraFromUserGesture() {
-            if (cameraStarted) return;
-            cameraStarted = true;
-
-            const warningEl = document.getElementById('hand-warning');
-            // Optional: show a helpful message before permission is granted
-            warningEl.style.display = 'block';
-            warningEl.textContent = '点击允许摄像头以启用手势交互';
-
-            try {
-                if (!navigator.mediaDevices?.getUserMedia) {
-                    throw new Error('getUserMedia_not_supported');
-                }
-
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: "user" },
-                    audio: false
-                });
-
-                // Ensure iOS can play the stream
-                video.muted = true;
-                video.setAttribute('muted', '');
-                video.playsInline = true;
-                video.setAttribute('playsinline', '');
-
+            
+            if (navigator.mediaDevices?.getUserMedia) {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 video.srcObject = stream;
-                await video.play().catch(() => {});
-
-                // Make preview visible once camera is running
-                const wrap = document.getElementById('webcam-wrapper');
-                if (wrap) wrap.style.opacity = 1;
-
-                // Start detection loop once video has data
-                video.addEventListener("loadeddata", predictWebcam, { once: true });
-
-                // Restore warning text (your original logic will hide it when hand is detected)
-                warningEl.textContent = '未识别到手势 - 请举起手';
-
-            } catch (err) {
-                cameraStarted = false; // allow retry
-                const name = err?.name || err?.message || String(err);
-                console.error("getUserMedia failed:", name, err);
-                alert(`Camera failed: ${name}`);
-
-                // Provide a more actionable hint
-                warningEl.style.display = 'block';
-                warningEl.textContent = '无法打开摄像头：请在系统设置/浏览器站点权限中允许摄像头，然后再点一次圣诞树';
+                video.addEventListener("loadeddata", predictWebcam);
             }
         }
 
