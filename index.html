@@ -20,7 +20,7 @@ body{
   align-items:center;
   justify-content:center;
   padding:24px;
-  font-family: system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
   background:
     radial-gradient(800px 400px at 20% 10%, rgba(255,170,200,.18), transparent),
     radial-gradient(800px 400px at 80% 20%, rgba(150,190,255,.18), transparent),
@@ -28,26 +28,18 @@ body{
   color:var(--text);
 }
 .card{
-  width:min(520px,100%);
+  width:min(560px,100%);
   padding:22px 20px;
   border-radius:18px;
   background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.05));
   border:1px solid var(--border);
   box-shadow:0 20px 60px rgba(0,0,0,.35);
 }
-h1{
-  margin:0 0 8px;
-  font-size:20px;
-}
-.sub{
-  font-size:14px;
-  color:var(--muted);
-  margin-bottom:14px;
-  line-height:1.7;
-}
+h1{margin:0 0 8px;font-size:20px;}
+.sub{font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.7;}
 .msg{
-  min-height:100px;
-  padding:14px;
+  min-height:120px;
+  padding:16px;
   border-radius:14px;
   background:rgba(0,0,0,.18);
   border:1px solid rgba(255,255,255,.1);
@@ -58,22 +50,45 @@ h1{
 .row{
   margin-top:14px;
   display:flex;
-  gap:10px;
+  gap:8px;
   flex-wrap:wrap;
 }
 button{
-  padding:10px 14px;
+  padding:8px 12px;
   border-radius:999px;
   border:1px solid rgba(255,255,255,.15);
   background:rgba(255,255,255,.06);
   color:var(--text);
-  font-size:14px;
+  font-size:13px;
   cursor:pointer;
   transition:.15s;
 }
 button:hover{
   transform:translateY(-1px);
   background:rgba(255,255,255,.1);
+}
+.signwall{
+  margin-top:20px;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,.12);
+}
+.signwall h2{
+  font-size:13px;
+  font-weight:normal;
+  margin:0 0 8px;
+  color:var(--muted);
+}
+.names{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.name{
+  font-size:12px;
+  padding:5px 9px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
 }
 .tiny{
   margin-top:10px;
@@ -84,52 +99,79 @@ button:hover{
 </head>
 <body>
 <div class="card">
-  <h1>卡卡，来这儿一下 🫶</h1>
+  <h1>卡卡，来这儿一下</h1>
   <div class="sub">来自一直支持你的我们。</div>
 
   <div class="msg" id="msg"></div>
 
   <div class="row">
-    <button id="btnNew">再说一句</button>
-    <button id="btnFans">粉丝抱抱</button>
-    <button id="btnIgnore">不和恶人一般见识</button>
+    <button onclick="show('support')">🤍 温柔支持</button>
+    <button onclick="show('ignore')">🛡 不和恶人一般见识</button>
+    <button onclick="show('affirm')">🌟 肯定卡卡</button>
+    <button onclick="show('calm')">🌿 稳住一下</button>
+    <button onclick="show('fans')">💬 粉丝心声</button>
   </div>
 
-  <div class="tiny">我们喜欢的，是努力又真实的卡卡。不是他们的声音。</div>
+  <div class="signwall">
+    <h2>粉丝签名墙</h2>
+    <div class="names">
+      <div class="name">小稀饭</div>
+      <div class="name">kk.</div>
+      <div class="name">Patrick</div>
+      <div class="name">SeeWay</div>
+      <div class="name">笑谈股金</div>
+      <div class="name">包子铺企鹅</div>
+      <div class="name">还有更多支持你的人</div>
+    </div>
+  </div>
+
+  <div class="tiny">我们喜欢的，是努力又真实的卡卡。</div>
 </div>
 
 <script>
-const messages = [
-"卡卡，你只要做好自己就够了。\n那些恶意的声音，不值得你停下来。",
-"我们喜欢的是你的认真、你的坚持。\n不是他们随口的评价。",
-"恶人爱喧哗，但支持你的人更长久。\n我们一直在。",
-"不必回应，不必纠缠。\n你的时间应该留给值得的人。",
-"卡卡，你继续发光。\n剩下的，我们帮你挡。"
-];
 
-const hugs = [
-"粉丝集体抱抱 🤍\n你不是一个人。",
-"来自我们的拥抱。\n你走你的路，我们陪着。",
-"我们会比恶意更大声。\n但用的是温柔。"
-];
+const messages = {
+support: [
+"卡卡，你不需要一个人消化这些。\n我们在你身后。",
+"被恶意刺到会难受，这是正常的。\n但你不需要为别人的恶负责。",
+"今天先照顾好自己。\n我们会一直陪着你。"
+],
 
-const ignore = [
+ignore: [
 "不回应，是最高级的回应。\n卡卡，不和恶人一般见识。",
 "他们的恶意，不配消耗你的情绪。",
-"让噪音留在远处。\n你只管向前。"
-];
+"噪音终究是噪音。\n你继续走你的路就好。"
+],
+
+affirm: [
+"我们喜欢的是你的真诚和努力。\n不是他们的随口评价。",
+"卡卡，你本身就值得被喜欢。\n不需要通过谁的认可来证明。",
+"真正关注你的人，看见的是你的光。"
+],
+
+calm: [
+"深呼吸一次。\n把那些话留在空气里，不带走。",
+"慢一点。\n你的情绪值得被温柔对待。",
+"今天不必坚强得那么用力。\n允许自己休息一下。"
+],
+
+fans: [
+"卡卡，你继续发光。\n剩下的，我们帮你挡。",
+"恶人声音再大，也盖不过我们支持你的心。",
+"支持你，不是一时情绪，是长期选择。"
+]
+};
 
 function pick(arr){
   return arr[Math.floor(Math.random()*arr.length)];
 }
 
-const msgEl = document.getElementById("msg");
+function show(type){
+  document.getElementById("msg").textContent = pick(messages[type]);
+}
 
-document.getElementById("btnNew").onclick = ()=> msgEl.textContent = pick(messages);
-document.getElementById("btnFans").onclick = ()=> msgEl.textContent = pick(hugs);
-document.getElementById("btnIgnore").onclick = ()=> msgEl.textContent = pick(ignore);
+show('support');
 
-msgEl.textContent = pick(messages);
 </script>
 </body>
 </html>
