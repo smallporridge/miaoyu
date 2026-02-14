@@ -6,7 +6,59 @@
     <title>For Miao</title>
     <style>
         /* ==========================================
-           1. 基础样式与背景配置 (Base & Background)
+           1. CSS 变量主题配置 (Theme Variables)
+           通过修改这里的颜色，可以轻松改变两种状态的视觉
+           ========================================== */
+        :root {
+            /* --- 状态 A：奢华黑金 (Luxury Gold) --- */
+            --bg-center: #1c0e11;
+            --bg-mid: #050304;
+            --bg-edge: #000000;
+            
+            /* 爱心金属渐变 */
+            --heart-c1: #fdf4d4;
+            --heart-c2: #d4af37;
+            --heart-c3: #8a5a19;
+            --heart-c4: #3a1c0d;
+            --heart-c5: #140603;
+            --heart-stroke: #b58d27;
+            
+            /* 爱心外发光 */
+            --heart-glow-1: rgba(212, 175, 55, 0.4);
+            --heart-glow-2: rgba(184, 15, 33, 0.2);
+            
+            /* 文字渐变 */
+            --text-c1: #9b7625;
+            --text-c2: #d4af37;
+            --text-c3: #fff8dc;
+        }
+
+        /* --- 状态 B：冰蓝纯洁风 (Pure Blue) --- */
+        body.theme-pure {
+            --bg-center: #ffffff;
+            --bg-mid: #e1f5fe;
+            --bg-edge: #b3e5fc;
+            
+            /* 爱心水晶/冰雪渐变 */
+            --heart-c1: #ffffff;
+            --heart-c2: #b2ebf2;
+            --heart-c3: #26c6da;
+            --heart-c4: #00838f;
+            --heart-c5: #004d40;
+            --heart-stroke: #80deea;
+            
+            /* 爱心外发光 (清澈的蓝光) */
+            --heart-glow-1: rgba(0, 188, 212, 0.5);
+            --heart-glow-2: rgba(255, 255, 255, 0.8);
+            
+            /* 文字渐变 */
+            --text-c1: #006064;
+            --text-c2: #00acc1;
+            --text-c3: #ffffff;
+        }
+
+        /* ==========================================
+           2. 基础样式与过渡设置 (Base & Transitions)
            ========================================== */
         * {
             margin: 0;
@@ -18,14 +70,13 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            /* 奢华暗色背景：深邃的黑红金渐变，带有细腻暗角 */
-            background: radial-gradient(ellipse at center, #1c0e11 0%, #050304 60%, #000000 100%);
+            /* 背景应用 CSS 变量，并添加平滑过渡 */
+            background: radial-gradient(ellipse at center, var(--bg-center) 0%, var(--bg-mid) 60%, var(--bg-edge) 100%);
+            transition: background 0.8s ease-in-out;
             font-family: 'Playfair Display', 'Didot', 'Bodoni MT', 'Times New Roman', serif;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* 粒子画布，置于最底层 */
         #particle-canvas {
             position: absolute;
             top: 0;
@@ -33,11 +84,11 @@
             width: 100%;
             height: 100%;
             z-index: 1;
-            pointer-events: none; /* 让鼠标事件穿透到下层 */
+            pointer-events: none;
         }
 
         /* ==========================================
-           2. 主体爱心与交互容器 (Heart Container)
+           3. 主体爱心与交互容器 (Heart Container)
            ========================================== */
         .content-wrapper {
             position: absolute;
@@ -54,21 +105,20 @@
 
         .heart-btn {
             position: relative;
-            width: 220px;
-            height: 220px;
+            width: 240px;
+            height: 240px;
             cursor: pointer;
-            /* 呼吸脉冲与轻微浮动组合动画 */
             animation: floatAndPulse 4s ease-in-out infinite;
-            transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.3s ease;
-            /* 默认的外围柔和辉光 */
-            filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.35)) drop-shadow(0 0 60px rgba(184, 15, 33, 0.15));
+            /* 辉光应用 CSS 变量 */
+            filter: drop-shadow(0 0 30px var(--heart-glow-1)) drop-shadow(0 0 70px var(--heart-glow-2));
+            transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.8s ease;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* 点击时的短暂爆发状态 */
+        /* 点击瞬间的收缩爆发状态 */
         .heart-btn.clicked {
-            transform: scale(0.92) !important;
-            filter: drop-shadow(0 0 50px rgba(255, 215, 0, 0.8)) brightness(1.3) !important;
+            transform: scale(0.85) !important;
+            filter: drop-shadow(0 0 60px var(--heart-c2)) brightness(1.5) !important;
         }
 
         @media (max-width: 768px) {
@@ -78,15 +128,22 @@
             }
         }
 
-        /* SVG 样式设置 */
         .luxury-heart-svg {
             width: 100%;
             height: 100%;
             overflow: visible;
         }
 
+        /* SVG 内的渐变色过渡（部分现代浏览器支持 stop-color 的 transition） */
+        stop {
+            transition: stop-color 0.8s ease-in-out;
+        }
+        use {
+            transition: stroke 0.8s ease-in-out;
+        }
+
         /* ==========================================
-           3. 极简高级文字 (Luxury Typography)
+           4. 文字排版 (Typography)
            ========================================== */
         .luxury-text {
             margin-top: 50px;
@@ -94,25 +151,29 @@
             font-weight: 400;
             letter-spacing: 0.2em;
             text-transform: uppercase;
-            /* 金属渐变文字 */
+            /* 文字颜色应用 CSS 变量 */
             background: linear-gradient(
                 to right,
-                #9b7625 0%,
-                #d4af37 25%,
-                #fff8dc 50%,
-                #d4af37 75%,
-                #9b7625 100%
+                var(--text-c1) 0%,
+                var(--text-c2) 25%,
+                var(--text-c3) 50%,
+                var(--text-c2) 75%,
+                var(--text-c1) 100%
             );
             background-size: 200% auto;
             color: #000;
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            /* 微弱辉光 */
-            text-shadow: 0px 4px 15px rgba(212, 175, 55, 0.25);
+            text-shadow: 0px 4px 15px var(--heart-glow-1);
             animation: textShine 6s linear infinite;
+            transition: text-shadow 0.8s ease, opacity 0.3s ease;
             user-select: none;
         }
+
+        /* 切换文字时的淡入淡出动画类 */
+        .text-fade-out { opacity: 0; }
+        .text-fade-in { opacity: 1; }
 
         @media (max-width: 768px) {
             .luxury-text {
@@ -123,22 +184,14 @@
         }
 
         /* ==========================================
-           4. CSS 动画定义 (Keyframes)
+           5. 动画定义 (Keyframes)
            ========================================== */
-        /* 浮动与呼吸脉冲合并，避免 transform 冲突 */
         @keyframes floatAndPulse {
-            0% {
-                transform: translateY(0) scale(1);
-            }
-            50% {
-                transform: translateY(-15px) scale(1.02);
-            }
-            100% {
-                transform: translateY(0) scale(1);
-            }
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.03); }
+            100% { transform: translateY(0) scale(1); }
         }
 
-        /* 文字金属反光扫过动画 */
         @keyframes textShine {
             0% { background-position: 200% center; }
             100% { background-position: -200% center; }
@@ -153,197 +206,192 @@
         <div class="heart-btn" id="heart-element">
             <svg class="luxury-heart-svg" viewBox="0 0 100 100">
                 <defs>
-                    <radialGradient id="heart-base" cx="30%" cy="30%" r="70%">
-                        <stop offset="0%" stop-color="#fdf4d4"/>
-                        <stop offset="15%" stop-color="#d4af37"/>
-                        <stop offset="50%" stop-color="#8a5a19"/>
-                        <stop offset="85%" stop-color="#3a1c0d"/>
-                        <stop offset="100%" stop-color="#140603"/>
+                    <radialGradient id="heart-base" cx="35%" cy="30%" r="70%">
+                        <stop offset="0%" stop-color="var(--heart-c1)"/>
+                        <stop offset="20%" stop-color="var(--heart-c2)"/>
+                        <stop offset="50%" stop-color="var(--heart-c3)"/>
+                        <stop offset="85%" stop-color="var(--heart-c4)"/>
+                        <stop offset="100%" stop-color="var(--heart-c5)"/>
                     </radialGradient>
 
                     <linearGradient id="glass-glaze" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stop-color="rgba(255, 255, 255, 0.8)"/>
-                        <stop offset="30%" stop-color="rgba(255, 255, 255, 0.1)"/>
+                        <stop offset="0%" stop-color="rgba(255, 255, 255, 0.9)"/>
+                        <stop offset="40%" stop-color="rgba(255, 255, 255, 0.15)"/>
                         <stop offset="100%" stop-color="rgba(255, 255, 255, 0)"/>
                     </linearGradient>
 
                     <linearGradient id="shimmer-sweep" x1="-100%" y1="0%" x2="0%" y2="0%">
                         <stop offset="0%" stop-color="rgba(255,255,255,0)" />
-                        <stop offset="40%" stop-color="rgba(255,255,255,0)" />
-                        <stop offset="50%" stop-color="rgba(255,255,255,0.7)" />
-                        <stop offset="60%" stop-color="rgba(255,255,255,0)" />
+                        <stop offset="45%" stop-color="rgba(255,255,255,0)" />
+                        <stop offset="50%" stop-color="rgba(255,255,255,0.8)" />
+                        <stop offset="55%" stop-color="rgba(255,255,255,0)" />
                         <stop offset="100%" stop-color="rgba(255,255,255,0)" />
-                        <animate attributeName="x1" values="-150%; 200%" dur="3.5s" repeatCount="indefinite" />
-                        <animate attributeName="x2" values="-50%; 300%" dur="3.5s" repeatCount="indefinite" />
+                        <animate attributeName="x1" values="-150%; 200%" dur="3s" repeatCount="indefinite" />
+                        <animate attributeName="x2" values="-50%; 300%" dur="3s" repeatCount="indefinite" />
                     </linearGradient>
 
-                    <path id="heart-path" d="M 50,88 C 50,88 10,60 10,32 C 10,15 28,10 40,20 C 46,25 50,33 50,33 C 50,33 54,25 60,20 C 72,10 90,15 90,32 C 90,60 50,88 50,88 Z" />
+                    <path id="heart-path" d="M 50,85 C 50,85 12,58 12,30 C 12,16 26,10 38,18 C 44,22 50,30 50,30 C 50,30 56,22 62,18 C 74,10 88,16 88,30 C 88,58 50,85 50,85 Z" />
                 </defs>
 
-                <use href="#heart-path" fill="url(#heart-base)" stroke="#b58d27" stroke-width="0.5" />
+                <use href="#heart-path" fill="url(#heart-base)" stroke="var(--heart-stroke)" stroke-width="0.5" />
                 
-                <use href="#heart-path" fill="none" stroke="rgba(255,215,0,0.5)" stroke-width="2" transform="scale(0.96) translate(2, 2)" />
+                <use href="#heart-path" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" transform="scale(0.95) translate(2.5, 3)" />
 
-                <path d="M 50,45 C 50,45 15,35 12,25 C 10,15 28,10 40,20 C 46,25 50,33 50,33 C 50,33 54,25 60,20 C 72,10 88,15 88,25 C 85,35 50,45 50,45 Z" fill="url(#glass-glaze)" />
+                <path d="M 50,40 C 50,40 18,32 15,22 C 14,15 28,12 38,18 C 44,22 50,30 50,30 C 50,30 56,22 62,18 C 72,12 86,15 85,22 C 82,32 50,40 50,40 Z" fill="url(#glass-glaze)" />
 
                 <use href="#heart-path" fill="url(#shimmer-sweep)" style="mix-blend-mode: overlay;" />
             </svg>
         </div>
 
-        <h1 class="luxury-text">For Miao Yu</h1>
+        <h1 class="luxury-text" id="main-text">For Miao Yu</h1>
     </div>
 
     <script>
         /* ==========================================
-           5. 全局可调参数区 (Configuration)
+           6. 主题与全局参数配置 (Theme & Config)
            ========================================== */
+        const THEMES = {
+            gold: {
+                text: "For Miao Yu",
+                // 金色系粒子：香槟金、纯金、暖白
+                particles: ['rgba(212, 175, 55, 0.9)', 'rgba(255, 215, 0, 1)', 'rgba(255, 248, 220, 0.8)'],
+                // 拖影底色：深邃黑红
+                bgBlur: ['rgba(28, 14, 17, 0.25)', 'rgba(5, 3, 4, 0.25)', 'rgba(0, 0, 0, 0.25)']
+            },
+            pure: {
+                text: "For Miao Yu",
+                // 纯净系粒子：冰蓝、青色、纯白
+                particles: ['rgba(255, 255, 255, 1)', 'rgba(128, 222, 234, 0.9)', 'rgba(0, 188, 212, 0.8)'],
+                // 拖影底色：明亮冰蓝
+                bgBlur: ['rgba(255, 255, 255, 0.35)', 'rgba(225, 245, 254, 0.35)', 'rgba(179, 229, 252, 0.35)']
+            }
+        };
+
+        let currentTheme = 'gold'; // 初始主题
+
         const CONFIG = {
-            PARTICLE_COUNT: 120,       // 默认环境粒子数量
-            BURST_COUNT: 80,           // 点击时爆发的粒子数量
-            PARTICLE_SPEED_BASE: 0.3,  // 粒子基础漂浮速度
-            PARTICLE_SIZE_MAX: 2.5,    // 粒子最大尺寸
-            ATTRACT_RADIUS: 180,       // 爱心吸引/排斥力场半径
-            ATTRACT_FORCE: 0.02,       // 吸引力系数（负数为排斥）
-            COLOR_PALETTE: [           // 粒子颜色盘（香槟金、玫瑰金、纯金）
-                'rgba(212, 175, 55, 0.8)', 
-                'rgba(255, 215, 0, 0.9)', 
-                'rgba(255, 248, 220, 0.7)',
-                'rgba(183, 110, 121, 0.6)'
-            ]
+            PARTICLE_COUNT: 100,
+            BURST_COUNT: 100,
+            PARTICLE_SPEED_BASE: 0.4,
+            PARTICLE_SIZE_MAX: 3,
+            ATTRACT_RADIUS: 200,
+            ATTRACT_FORCE: 0.025
         };
 
         /* ==========================================
-           6. Canvas & 粒子系统引擎 (Engine)
+           7. 粒子系统引擎 (Particle Engine)
            ========================================== */
         const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d', { alpha: false }); // alpha: false 提升绘制性能，底色由自身重绘
+        const ctx = canvas.getContext('2d', { alpha: false });
         let width, height;
         let particles = [];
         let heartCenter = { x: 0, y: 0 };
 
-        // 初始化 Canvas 尺寸
         function resize() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
-            // 更新爱心力场中心点
             const heartEl = document.getElementById('heart-element');
             const rect = heartEl.getBoundingClientRect();
             heartCenter.x = rect.left + rect.width / 2;
             heartCenter.y = rect.top + rect.height / 2;
         }
-
         window.addEventListener('resize', resize);
 
-        // 工具函数：获取随机数
-        function random(min, max) {
-            return Math.random() * (max - min) + min;
-        }
+        function random(min, max) { return Math.random() * (max - min) + min; }
 
-        // 工具函数：获取随机颜色
         function getRandomColor() {
-            return CONFIG.COLOR_PALETTE[Math.floor(Math.random() * CONFIG.COLOR_PALETTE.length)];
+            const palette = THEMES[currentTheme].particles;
+            return palette[Math.floor(Math.random() * palette.length)];
         }
 
-        /* 粒子类定义 */
         class Particle {
             constructor(x, y, isBurst = false) {
                 this.x = x !== undefined ? x : random(0, width);
                 this.y = y !== undefined ? y : random(0, height);
                 
-                // 爆发粒子具有更高的初始速度和更短的生命周期
                 if (isBurst) {
                     const angle = random(0, Math.PI * 2);
-                    const speed = random(3, 12);
+                    // 爆发速度更快，效果更张扬
+                    const speed = random(5, 18);
                     this.vx = Math.cos(angle) * speed;
                     this.vy = Math.sin(angle) * speed;
-                    this.size = random(1.5, 4);
-                    this.life = random(0.5, 1);
-                    this.decay = random(0.01, 0.03); // 衰减率
+                    this.size = random(2, 5);
+                    this.life = random(0.6, 1.2);
+                    this.decay = random(0.015, 0.03);
                     this.isBurst = true;
                 } else {
                     this.vx = random(-CONFIG.PARTICLE_SPEED_BASE, CONFIG.PARTICLE_SPEED_BASE);
-                    this.vy = random(-CONFIG.PARTICLE_SPEED_BASE, -CONFIG.PARTICLE_SPEED_BASE * 3); // 默认向上微浮
-                    this.size = random(0.5, CONFIG.PARTICLE_SIZE_MAX);
+                    this.vy = random(-CONFIG.PARTICLE_SPEED_BASE, -CONFIG.PARTICLE_SPEED_BASE * 3);
+                    this.size = random(0.8, CONFIG.PARTICLE_SIZE_MAX);
                     this.life = random(0.3, 0.8);
-                    this.decay = 0; // 环境粒子不自动消亡
+                    this.decay = 0;
                     this.isBurst = false;
                 }
                 
+                // 初始化颜色时，绑定当前主题色
                 this.color = getRandomColor();
                 this.baseAlpha = this.life;
             }
 
             update() {
-                // 如果是爆发粒子，应用摩擦力和生命周期衰减
                 if (this.isBurst) {
-                    this.vx *= 0.92; // 阻力
-                    this.vy *= 0.92;
+                    this.vx *= 0.9; // 空气阻力
+                    this.vy *= 0.9;
                     this.life -= this.decay;
                     this.x += this.vx;
                     this.y += this.vy;
-                    return; // 爆发粒子不受力场影响
+                    return; 
                 }
 
-                // 核心交互：环境粒子与爱心的互动（力场）
                 const dx = heartCenter.x - this.x;
                 const dy = heartCenter.y - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
-                // 如果靠近爱心，产生柔和的环绕或排斥感
+                // 星云漩涡吸引力场
                 if (distance < CONFIG.ATTRACT_RADIUS) {
                     const forceDirectionX = dx / distance;
                     const forceDirectionY = dy / distance;
-                    // 引力公式，距离越近力越大
                     const force = (CONFIG.ATTRACT_RADIUS - distance) / CONFIG.ATTRACT_RADIUS;
                     
-                    // 应用微弱的吸引力 + 切向力形成环绕
-                    this.vx += forceDirectionX * CONFIG.ATTRACT_FORCE + (forceDirectionY * 0.01);
-                    this.vy += forceDirectionY * CONFIG.ATTRACT_FORCE - (forceDirectionX * 0.01);
+                    this.vx += forceDirectionX * CONFIG.ATTRACT_FORCE + (forceDirectionY * 0.015);
+                    this.vy += forceDirectionY * CONFIG.ATTRACT_FORCE - (forceDirectionX * 0.015);
                 }
 
-                // 边界检测与重置（实现无缝循环流动）
                 this.x += this.vx;
                 this.y += this.vy;
 
-                // 增加轻微的布朗运动（随机抖动）
-                this.vx += random(-0.01, 0.01);
-                this.vy += random(-0.01, 0.01);
+                this.vx += random(-0.015, 0.015);
+                this.vy += random(-0.015, 0.015);
 
-                // 限制最大速度
-                const maxSpeed = 1.5;
+                const maxSpeed = 2;
                 const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
                 if (currentSpeed > maxSpeed) {
                     this.vx = (this.vx / currentSpeed) * maxSpeed;
                     this.vy = (this.vy / currentSpeed) * maxSpeed;
                 }
 
-                // 越界重置到画布下方或边缘
                 if (this.x < 0) this.x = width;
                 if (this.x > width) this.x = 0;
                 if (this.y < 0) {
                     this.y = height;
                     this.x = random(0, width);
+                    this.color = getRandomColor(); // 越界重生时更新颜色（适配主题切换）
                 }
                 if (this.y > height) this.y = 0;
             }
 
             draw() {
-                // 绘制发光粒子
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 
-                // 计算当前透明度
                 let currentAlpha = this.isBurst ? this.life : this.baseAlpha;
                 if (currentAlpha < 0) currentAlpha = 0;
 
-                // 替换颜色字符串中的透明度以实现闪烁/衰减
                 const colorStr = this.color.replace(/[\d\.]+\)$/g, currentAlpha + ')');
-                
                 ctx.fillStyle = colorStr;
                 
-                // 为大颗粒添加发光效果（耗性能，适度使用）
-                if (this.size > 1.5) {
-                    ctx.shadowBlur = 8;
+                if (this.size > 2) {
+                    ctx.shadowBlur = 10;
                     ctx.shadowColor = colorStr;
                 } else {
                     ctx.shadowBlur = 0;
@@ -353,7 +401,6 @@
             }
         }
 
-        // 初始化环境粒子
         function initParticles() {
             particles = [];
             for (let i = 0; i < CONFIG.PARTICLE_COUNT; i++) {
@@ -362,63 +409,79 @@
         }
 
         /* ==========================================
-           7. 交互逻辑 (Interaction)
+           8. 交互逻辑：魔法切换 (Theme Toggle)
            ========================================== */
         const heartEl = document.getElementById('heart-element');
+        const textEl = document.getElementById('main-text');
 
-        // 触发金粉粒子爆发
-        function triggerBurst(e) {
-            // 添加 CSS 点击动画类
+        function toggleThemeAndBurst() {
+            // 1. 触发点击爆发动画
             heartEl.classList.add('clicked');
             setTimeout(() => heartEl.classList.remove('clicked'), 150);
 
-            // 生成爆发粒子
+            // 2. 切换主题状态
+            currentTheme = currentTheme === 'gold' ? 'pure' : 'gold';
+            
+            // 切换 body 的 class，触发 CSS 颜色过渡
+            if (currentTheme === 'pure') {
+                document.body.classList.add('theme-pure');
+            } else {
+                document.body.classList.remove('theme-pure');
+            }
+
+            // 3. 优雅地更换文案
+            textEl.classList.add('text-fade-out');
+            setTimeout(() => {
+                textEl.innerText = THEMES[currentTheme].text;
+                textEl.classList.remove('text-fade-out');
+                textEl.classList.add('text-fade-in');
+            }, 300); // 等待淡出后再修改文字
+
+            // 4. 强制刷新所有现有环境粒子的颜色，使其立即融入新主题
+            particles.forEach(p => {
+                if (!p.isBurst) p.color = getRandomColor();
+            });
+
+            // 5. 瞬间爆发大量符合新主题颜色的粒子
             for (let i = 0; i < CONFIG.BURST_COUNT; i++) {
-                // 从心形中心略微随机偏移的位置爆发
-                const offsetX = random(-20, 20);
-                const offsetY = random(-20, 20);
+                const offsetX = random(-30, 30);
+                const offsetY = random(-30, 30);
                 particles.push(new Particle(heartCenter.x + offsetX, heartCenter.y + offsetY, true));
             }
         }
 
-        // 绑定点击与触摸事件
-        heartEl.addEventListener('mousedown', triggerBurst);
+        heartEl.addEventListener('mousedown', toggleThemeAndBurst);
         heartEl.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // 防止穿透
-            triggerBurst();
+            e.preventDefault(); 
+            toggleThemeAndBurst();
         }, { passive: false });
 
         /* ==========================================
-           8. 主渲染循环 (Render Loop)
+           9. 渲染循环 (Render Loop)
            ========================================== */
         function animate() {
-            // 使用带有透明度的黑色清空画布，实现拖影效果（Motion Blur）
-            // 因为整体底色我们在 body 设置了，canvas 这里通过 fillRect 覆盖产生动态模糊
-            // 为了不遮挡 body 的径向渐变，我们这里手动绘制一个径向渐变背景清空
+            // 根据当前主题，绘制不同的动态模糊拖影层
+            const blurColors = THEMES[currentTheme].bgBlur;
             const bgGradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width/1.2);
-            bgGradient.addColorStop(0, 'rgba(28, 14, 17, 0.3)'); // 中心暗红带透明度
-            bgGradient.addColorStop(0.6, 'rgba(5, 3, 4, 0.3)');
-            bgGradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
+            bgGradient.addColorStop(0, blurColors[0]);
+            bgGradient.addColorStop(0.6, blurColors[1]);
+            bgGradient.addColorStop(1, blurColors[2]);
             
             ctx.fillStyle = bgGradient;
             ctx.fillRect(0, 0, width, height);
 
-            // 更新和绘制粒子
             for (let i = particles.length - 1; i >= 0; i--) {
                 let p = particles[i];
                 p.update();
                 p.draw();
-
-                // 移除死亡的爆发粒子
                 if (p.isBurst && p.life <= 0) {
                     particles.splice(i, 1);
                 }
             }
-
             requestAnimationFrame(animate);
         }
 
-        // 启动程序
+        // 启动
         resize();
         initParticles();
         animate();
