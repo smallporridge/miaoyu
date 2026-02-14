@@ -1,177 +1,427 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>给卡卡的小页面</title>
-<style>
-:root{
-  --bg:#0b1220;
-  --card:rgba(255,255,255,.08);
-  --border:rgba(255,255,255,.15);
-  --text:#eef3ff;
-  --muted:rgba(238,243,255,.7);
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:24px;
-  font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
-  background:
-    radial-gradient(800px 400px at 20% 10%, rgba(255,170,200,.18), transparent),
-    radial-gradient(800px 400px at 80% 20%, rgba(150,190,255,.18), transparent),
-    var(--bg);
-  color:var(--text);
-}
-.card{
-  width:min(560px,100%);
-  padding:22px 20px;
-  border-radius:18px;
-  background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.05));
-  border:1px solid var(--border);
-  box-shadow:0 20px 60px rgba(0,0,0,.35);
-}
-h1{margin:0 0 8px;font-size:20px;}
-.sub{font-size:14px;color:var(--muted);margin-bottom:14px;line-height:1.7;}
-.msg{
-  min-height:120px;
-  padding:16px;
-  border-radius:14px;
-  background:rgba(0,0,0,.18);
-  border:1px solid rgba(255,255,255,.1);
-  line-height:1.75;
-  font-size:15px;
-  white-space:pre-wrap;
-}
-.row{
-  margin-top:14px;
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-button{
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.15);
-  background:rgba(255,255,255,.06);
-  color:var(--text);
-  font-size:13px;
-  cursor:pointer;
-  transition:.15s;
-}
-button:hover{
-  transform:translateY(-1px);
-  background:rgba(255,255,255,.1);
-}
-.signwall{
-  margin-top:20px;
-  padding-top:14px;
-  border-top:1px solid rgba(255,255,255,.12);
-}
-.signwall h2{
-  font-size:13px;
-  font-weight:normal;
-  margin:0 0 8px;
-  color:var(--muted);
-}
-.names{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
-.name{
-  font-size:12px;
-  padding:5px 9px;
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.12);
-}
-.tiny{
-  margin-top:10px;
-  font-size:12px;
-  color:rgba(238,243,255,.55);
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>For Miao</title>
+    <style>
+        /* ==========================================
+           1. 基础样式与背景配置 (Base & Background)
+           ========================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            /* 奢华暗色背景：深邃的黑红金渐变，带有细腻暗角 */
+            background: radial-gradient(ellipse at center, #1c0e11 0%, #050304 60%, #000000 100%);
+            font-family: 'Playfair Display', 'Didot', 'Bodoni MT', 'Times New Roman', serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 粒子画布，置于最底层 */
+        #particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none; /* 让鼠标事件穿透到下层 */
+        }
+
+        /* ==========================================
+           2. 主体爱心与交互容器 (Heart Container)
+           ========================================== */
+        .content-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+
+        .heart-btn {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            cursor: pointer;
+            /* 呼吸脉冲与轻微浮动组合动画 */
+            animation: floatAndPulse 4s ease-in-out infinite;
+            transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.3s ease;
+            /* 默认的外围柔和辉光 */
+            filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.35)) drop-shadow(0 0 60px rgba(184, 15, 33, 0.15));
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 点击时的短暂爆发状态 */
+        .heart-btn.clicked {
+            transform: scale(0.92) !important;
+            filter: drop-shadow(0 0 50px rgba(255, 215, 0, 0.8)) brightness(1.3) !important;
+        }
+
+        @media (max-width: 768px) {
+            .heart-btn {
+                width: 180px;
+                height: 180px;
+            }
+        }
+
+        /* SVG 样式设置 */
+        .luxury-heart-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        /* ==========================================
+           3. 极简高级文字 (Luxury Typography)
+           ========================================== */
+        .luxury-text {
+            margin-top: 50px;
+            font-size: 2.2rem;
+            font-weight: 400;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            /* 金属渐变文字 */
+            background: linear-gradient(
+                to right,
+                #9b7625 0%,
+                #d4af37 25%,
+                #fff8dc 50%,
+                #d4af37 75%,
+                #9b7625 100%
+            );
+            background-size: 200% auto;
+            color: #000;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            /* 微弱辉光 */
+            text-shadow: 0px 4px 15px rgba(212, 175, 55, 0.25);
+            animation: textShine 6s linear infinite;
+            user-select: none;
+        }
+
+        @media (max-width: 768px) {
+            .luxury-text {
+                font-size: 1.5rem;
+                letter-spacing: 0.15em;
+                margin-top: 40px;
+            }
+        }
+
+        /* ==========================================
+           4. CSS 动画定义 (Keyframes)
+           ========================================== */
+        /* 浮动与呼吸脉冲合并，避免 transform 冲突 */
+        @keyframes floatAndPulse {
+            0% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-15px) scale(1.02);
+            }
+            100% {
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* 文字金属反光扫过动画 */
+        @keyframes textShine {
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
+        }
+    </style>
 </head>
 <body>
-<div class="card">
-  <h1>卡卡，来这儿一下</h1>
-  <div class="sub">来自一直支持你的我们。</div>
 
-  <div class="msg" id="msg"></div>
+    <canvas id="particle-canvas"></canvas>
 
-  <div class="row">
-    <button onclick="show('support')">🤍 温柔支持</button>
-    <button onclick="show('ignore')">🛡 不和恶人一般见识</button>
-    <button onclick="show('affirm')">🌟 肯定卡卡</button>
-    <button onclick="show('calm')">🌿 稳住一下</button>
-    <button onclick="show('fans')">💬 粉丝心声</button>
-  </div>
+    <div class="content-wrapper">
+        <div class="heart-btn" id="heart-element">
+            <svg class="luxury-heart-svg" viewBox="0 0 100 100">
+                <defs>
+                    <radialGradient id="heart-base" cx="30%" cy="30%" r="70%">
+                        <stop offset="0%" stop-color="#fdf4d4"/>
+                        <stop offset="15%" stop-color="#d4af37"/>
+                        <stop offset="50%" stop-color="#8a5a19"/>
+                        <stop offset="85%" stop-color="#3a1c0d"/>
+                        <stop offset="100%" stop-color="#140603"/>
+                    </radialGradient>
 
-  <div class="signwall">
-    <h2>粉丝签名墙</h2>
-    <div class="names">
-      <div class="name">小稀饭</div>
-      <div class="name">kk.</div>
-      <div class="name">Patrick</div>
-      <div class="name">SeeWay</div>
-      <div class="name">笑谈股金</div>
-      <div class="name">包子铺企鹅</div>
-      <div class="name">还有更多支持你的人</div>
+                    <linearGradient id="glass-glaze" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="rgba(255, 255, 255, 0.8)"/>
+                        <stop offset="30%" stop-color="rgba(255, 255, 255, 0.1)"/>
+                        <stop offset="100%" stop-color="rgba(255, 255, 255, 0)"/>
+                    </linearGradient>
+
+                    <linearGradient id="shimmer-sweep" x1="-100%" y1="0%" x2="0%" y2="0%">
+                        <stop offset="0%" stop-color="rgba(255,255,255,0)" />
+                        <stop offset="40%" stop-color="rgba(255,255,255,0)" />
+                        <stop offset="50%" stop-color="rgba(255,255,255,0.7)" />
+                        <stop offset="60%" stop-color="rgba(255,255,255,0)" />
+                        <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+                        <animate attributeName="x1" values="-150%; 200%" dur="3.5s" repeatCount="indefinite" />
+                        <animate attributeName="x2" values="-50%; 300%" dur="3.5s" repeatCount="indefinite" />
+                    </linearGradient>
+
+                    <path id="heart-path" d="M 50,88 C 50,88 10,60 10,32 C 10,15 28,10 40,20 C 46,25 50,33 50,33 C 50,33 54,25 60,20 C 72,10 90,15 90,32 C 90,60 50,88 50,88 Z" />
+                </defs>
+
+                <use href="#heart-path" fill="url(#heart-base)" stroke="#b58d27" stroke-width="0.5" />
+                
+                <use href="#heart-path" fill="none" stroke="rgba(255,215,0,0.5)" stroke-width="2" transform="scale(0.96) translate(2, 2)" />
+
+                <path d="M 50,45 C 50,45 15,35 12,25 C 10,15 28,10 40,20 C 46,25 50,33 50,33 C 50,33 54,25 60,20 C 72,10 88,15 88,25 C 85,35 50,45 50,45 Z" fill="url(#glass-glaze)" />
+
+                <use href="#heart-path" fill="url(#shimmer-sweep)" style="mix-blend-mode: overlay;" />
+            </svg>
+        </div>
+
+        <h1 class="luxury-text">For Miao Yu</h1>
     </div>
-  </div>
 
-  <div class="tiny">我们喜欢的，是努力又真实的卡卡。</div>
-</div>
+    <script>
+        /* ==========================================
+           5. 全局可调参数区 (Configuration)
+           ========================================== */
+        const CONFIG = {
+            PARTICLE_COUNT: 120,       // 默认环境粒子数量
+            BURST_COUNT: 80,           // 点击时爆发的粒子数量
+            PARTICLE_SPEED_BASE: 0.3,  // 粒子基础漂浮速度
+            PARTICLE_SIZE_MAX: 2.5,    // 粒子最大尺寸
+            ATTRACT_RADIUS: 180,       // 爱心吸引/排斥力场半径
+            ATTRACT_FORCE: 0.02,       // 吸引力系数（负数为排斥）
+            COLOR_PALETTE: [           // 粒子颜色盘（香槟金、玫瑰金、纯金）
+                'rgba(212, 175, 55, 0.8)', 
+                'rgba(255, 215, 0, 0.9)', 
+                'rgba(255, 248, 220, 0.7)',
+                'rgba(183, 110, 121, 0.6)'
+            ]
+        };
 
-<script>
+        /* ==========================================
+           6. Canvas & 粒子系统引擎 (Engine)
+           ========================================== */
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d', { alpha: false }); // alpha: false 提升绘制性能，底色由自身重绘
+        let width, height;
+        let particles = [];
+        let heartCenter = { x: 0, y: 0 };
 
-const messages = {
-support: [
-"卡卡，你不需要一个人消化这些。\n我们在你身后。",
-"被恶意刺到会难受，这是正常的。\n但你不需要为别人的恶负责。",
-"今天先照顾好自己。\n我们会一直陪着你。"
-],
+        // 初始化 Canvas 尺寸
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            // 更新爱心力场中心点
+            const heartEl = document.getElementById('heart-element');
+            const rect = heartEl.getBoundingClientRect();
+            heartCenter.x = rect.left + rect.width / 2;
+            heartCenter.y = rect.top + rect.height / 2;
+        }
 
-ignore: [
-"不回应，是最高级的回应。\n卡卡，不和恶人一般见识。",
-"他们的恶意，不配消耗你的情绪。",
-"噪音终究是噪音。\n你继续走你的路就好。"
-],
+        window.addEventListener('resize', resize);
 
-affirm: [
-"我们喜欢的是你的真诚和努力。\n不是他们的随口评价。",
-"卡卡，你本身就值得被喜欢。\n不需要通过谁的认可来证明。",
-"真正关注你的人，看见的是你的光。"
-],
+        // 工具函数：获取随机数
+        function random(min, max) {
+            return Math.random() * (max - min) + min;
+        }
 
-calm: [
-"深呼吸一次。\n把那些话留在空气里，不带走。",
-"慢一点。\n你的情绪值得被温柔对待。",
-"今天不必坚强得那么用力。\n允许自己休息一下。"
-],
+        // 工具函数：获取随机颜色
+        function getRandomColor() {
+            return CONFIG.COLOR_PALETTE[Math.floor(Math.random() * CONFIG.COLOR_PALETTE.length)];
+        }
 
-fans: [
-"卡卡，你继续发光。\n剩下的，我们帮你挡。",
-"恶人声音再大，也盖不过我们支持你的心。",
-"支持你，不是一时情绪，是长期选择。"
-]
-};
+        /* 粒子类定义 */
+        class Particle {
+            constructor(x, y, isBurst = false) {
+                this.x = x !== undefined ? x : random(0, width);
+                this.y = y !== undefined ? y : random(0, height);
+                
+                // 爆发粒子具有更高的初始速度和更短的生命周期
+                if (isBurst) {
+                    const angle = random(0, Math.PI * 2);
+                    const speed = random(3, 12);
+                    this.vx = Math.cos(angle) * speed;
+                    this.vy = Math.sin(angle) * speed;
+                    this.size = random(1.5, 4);
+                    this.life = random(0.5, 1);
+                    this.decay = random(0.01, 0.03); // 衰减率
+                    this.isBurst = true;
+                } else {
+                    this.vx = random(-CONFIG.PARTICLE_SPEED_BASE, CONFIG.PARTICLE_SPEED_BASE);
+                    this.vy = random(-CONFIG.PARTICLE_SPEED_BASE, -CONFIG.PARTICLE_SPEED_BASE * 3); // 默认向上微浮
+                    this.size = random(0.5, CONFIG.PARTICLE_SIZE_MAX);
+                    this.life = random(0.3, 0.8);
+                    this.decay = 0; // 环境粒子不自动消亡
+                    this.isBurst = false;
+                }
+                
+                this.color = getRandomColor();
+                this.baseAlpha = this.life;
+            }
 
-function pick(arr){
-  return arr[Math.floor(Math.random()*arr.length)];
-}
+            update() {
+                // 如果是爆发粒子，应用摩擦力和生命周期衰减
+                if (this.isBurst) {
+                    this.vx *= 0.92; // 阻力
+                    this.vy *= 0.92;
+                    this.life -= this.decay;
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    return; // 爆发粒子不受力场影响
+                }
 
-function show(type){
-  document.getElementById("msg").textContent = pick(messages[type]);
-}
+                // 核心交互：环境粒子与爱心的互动（力场）
+                const dx = heartCenter.x - this.x;
+                const dy = heartCenter.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
 
-show('support');
+                // 如果靠近爱心，产生柔和的环绕或排斥感
+                if (distance < CONFIG.ATTRACT_RADIUS) {
+                    const forceDirectionX = dx / distance;
+                    const forceDirectionY = dy / distance;
+                    // 引力公式，距离越近力越大
+                    const force = (CONFIG.ATTRACT_RADIUS - distance) / CONFIG.ATTRACT_RADIUS;
+                    
+                    // 应用微弱的吸引力 + 切向力形成环绕
+                    this.vx += forceDirectionX * CONFIG.ATTRACT_FORCE + (forceDirectionY * 0.01);
+                    this.vy += forceDirectionY * CONFIG.ATTRACT_FORCE - (forceDirectionX * 0.01);
+                }
 
-</script>
+                // 边界检测与重置（实现无缝循环流动）
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // 增加轻微的布朗运动（随机抖动）
+                this.vx += random(-0.01, 0.01);
+                this.vy += random(-0.01, 0.01);
+
+                // 限制最大速度
+                const maxSpeed = 1.5;
+                const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                if (currentSpeed > maxSpeed) {
+                    this.vx = (this.vx / currentSpeed) * maxSpeed;
+                    this.vy = (this.vy / currentSpeed) * maxSpeed;
+                }
+
+                // 越界重置到画布下方或边缘
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) {
+                    this.y = height;
+                    this.x = random(0, width);
+                }
+                if (this.y > height) this.y = 0;
+            }
+
+            draw() {
+                // 绘制发光粒子
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                
+                // 计算当前透明度
+                let currentAlpha = this.isBurst ? this.life : this.baseAlpha;
+                if (currentAlpha < 0) currentAlpha = 0;
+
+                // 替换颜色字符串中的透明度以实现闪烁/衰减
+                const colorStr = this.color.replace(/[\d\.]+\)$/g, currentAlpha + ')');
+                
+                ctx.fillStyle = colorStr;
+                
+                // 为大颗粒添加发光效果（耗性能，适度使用）
+                if (this.size > 1.5) {
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = colorStr;
+                } else {
+                    ctx.shadowBlur = 0;
+                }
+                
+                ctx.fill();
+            }
+        }
+
+        // 初始化环境粒子
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < CONFIG.PARTICLE_COUNT; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        /* ==========================================
+           7. 交互逻辑 (Interaction)
+           ========================================== */
+        const heartEl = document.getElementById('heart-element');
+
+        // 触发金粉粒子爆发
+        function triggerBurst(e) {
+            // 添加 CSS 点击动画类
+            heartEl.classList.add('clicked');
+            setTimeout(() => heartEl.classList.remove('clicked'), 150);
+
+            // 生成爆发粒子
+            for (let i = 0; i < CONFIG.BURST_COUNT; i++) {
+                // 从心形中心略微随机偏移的位置爆发
+                const offsetX = random(-20, 20);
+                const offsetY = random(-20, 20);
+                particles.push(new Particle(heartCenter.x + offsetX, heartCenter.y + offsetY, true));
+            }
+        }
+
+        // 绑定点击与触摸事件
+        heartEl.addEventListener('mousedown', triggerBurst);
+        heartEl.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // 防止穿透
+            triggerBurst();
+        }, { passive: false });
+
+        /* ==========================================
+           8. 主渲染循环 (Render Loop)
+           ========================================== */
+        function animate() {
+            // 使用带有透明度的黑色清空画布，实现拖影效果（Motion Blur）
+            // 因为整体底色我们在 body 设置了，canvas 这里通过 fillRect 覆盖产生动态模糊
+            // 为了不遮挡 body 的径向渐变，我们这里手动绘制一个径向渐变背景清空
+            const bgGradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width/1.2);
+            bgGradient.addColorStop(0, 'rgba(28, 14, 17, 0.3)'); // 中心暗红带透明度
+            bgGradient.addColorStop(0.6, 'rgba(5, 3, 4, 0.3)');
+            bgGradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
+            
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // 更新和绘制粒子
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.update();
+                p.draw();
+
+                // 移除死亡的爆发粒子
+                if (p.isBurst && p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // 启动程序
+        resize();
+        initParticles();
+        animate();
+    </script>
 </body>
 </html>
